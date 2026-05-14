@@ -1,0 +1,53 @@
+# GitHub Actions CI Pipeline
+# Auto-runs Python performance test scripts on every push to main
+# This is your DevOps/SRE demonstration!
+
+name: ⚡ AI Performance Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  run-perf-tests:
+    runs-on: ubuntu-latest
+    name: Run Performance Test Scripts
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: 📊 Run Response Time Stats
+        run: python 01_python_basics/response_time_stats.py
+
+      - name: 🚀 Run Basic Load Test
+        run: python 02_api_load_testing/basic_load_test.py
+
+      - name: 🤖 Run LLM Response Validation
+        run: python 03_ai_response_testing/test_llm_response.py
+
+      - name: ⚡ Run LLM Benchmarking
+        run: python 04_llm_benchmarking/llm_benchmark.py
+
+      - name: 📈 Run SLO Calculator
+        run: python 06_observability_sre/slo_calculator.py
+
+      - name: 📁 Upload benchmark reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: 04_llm_benchmarking/benchmark_results/
+          retention-days: 30
